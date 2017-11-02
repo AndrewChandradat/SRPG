@@ -1,6 +1,6 @@
 from enum import Enum
 
-class Stat(Enum):
+class Stat( Enum ):
 	NONE = 0
 	HP = 1
 	MP = 2
@@ -23,8 +23,8 @@ class Action:
 		self.target = target
 		self.modifier = stat
 
-	def allyTargeted( self ):
+	def ally_targeted( self ):
 		return ( self.target == Target.SELF ) or ( self.target == Target.ALLY ) or ( self.target == Target.PARTY )
 
-	def enemyTargeted( self ):
-		return not self.allyTargeted()
+	def enemy_targeted( self ):
+		return not self.ally_targeted()

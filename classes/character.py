@@ -1,6 +1,21 @@
-#import action
-
 from classes.action import Target, Stat, Action
+
+'''
+Character
+__init__( self, name, hp = 10, strength = 1 )
+add_action( self, new_action )
+copy( self )
+
+CharacterInstance
+__init__( self, original )
+__str__( self )
+take_damage( self, dmg )
+is_alive( self )
+is_dead( self )
+actions( self )
+get_action( self, index )
+name( self )
+'''
 
 attack = Action( "Attack", "", 1, Target.SINGLE, Stat.STRENGTH )
 
@@ -10,10 +25,10 @@ class Character:
 		self.hp = hp
 		self.strength = strength
 		self.movelist = []
-		self.addAction( attack )
+		self.add_action( attack )
 
 
-	def addAction( self, new_action ):
+	def add_action( self, new_action ):
 		self.movelist.append( new_action )
 
 	def copy( self ):
@@ -30,23 +45,23 @@ class CharacterInstance:
 	def __str__( self ):
 		return self.original.name
 
-	def takeDamage( self, dmg ):
+	def take_damage( self, dmg ):
 		self.currHP -= dmg;
 		if( self.currHP < 1 ):
 			self.currHP = 0
 		elif( self.currHP > self.maxHP ):
 			self.currHP = self.maxHP
 
-	def isAlive( self ):
+	def is_alive( self ):
 		return self.currHP > 0
 
-	def isDead( self ):
-		return not self.isAlive()
+	def is_dead( self ):
+		return not self.is_alive()
 
 	def actions( self ):
 		return self.original.movelist
 
-	def getAction( self, index ):
+	def get_action( self, index ):
 		return self.original.movelist[index]
 
 	def name( self ):
