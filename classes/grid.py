@@ -16,10 +16,10 @@ get_character( self, col_num, row_num )
 space_is_occupied( self, col_num, row_num )
 character_is_dead( self, col_num, row_num )
 character_is_Alive( self, col_num, row_num )
-set_rect_id( self, col_num, row_num, rectID )
-get_rect_id( self, col_num, row_num )
-set_text_id( self, col_num, row_num, textID )
-get_text_id( self, col_num, row_num )
+# set_rect_id( self, col_num, row_num, rectID )
+# get_rect_id( self, col_num, row_num )
+# set_text_id( self, col_num, row_num, textID )
+# get_text_id( self, col_num, row_num )
 '''
 
 class Square:
@@ -71,14 +71,15 @@ class Grid:
 	def character_is_alive( self, col_num, row_num ):
 		return self.spaces[ col_num ][ row_num ].get_character().is_alive()
 
-	def set_rect_id( self, col_num, row_num, rectID ):
-		self.spaces[ col_num ][ row_num ].rectID = rectID
-
-	def get_rect_id( self, col_num, row_num ):
-		return self.spaces[ col_num ][ row_num ].rectID
-
-	def set_text_id( self, col_num, row_num, textID ):
-		self.spaces[ col_num ][ row_num ].textID = textID
-
-	def get_text_id( self, col_num, row_num ):
-		return self.spaces[ col_num ][ row_num ].textID
+	#
+	# def set_rect_id( self, col_num, row_num, rectID ):
+	# 	self.spaces[ col_num ][ row_num ].rectID = rectID
+	#
+	# def get_rect_id( self, col_num, row_num ):
+	# 	return self.spaces[ col_num ][ row_num ].rectID
+	#
+	# def set_text_id( self, col_num, row_num, textID ):
+	# 	self.spaces[ col_num ][ row_num ].textID = textID
+	#
+	# def get_text_id( self, col_num, row_num ):
+	# 	return self.spaces[ col_num ][ row_num ].textID

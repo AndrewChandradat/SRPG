@@ -2,19 +2,22 @@ from classes.grid import Grid
 
 '''
 __init__( self, allies, enemies, num_cols, num_rows )
-nextTurn( self )
-isAllyTurn( self )
-spaceIsOccupied( self, col_num, row_num )
-getCharacter( self, col_num, row_num )
-ActiveCharacter( self )
-SelectedAction( self )
-Target( self )
+next_turn( self )
+is_ally_turn( self )
+space_is_occupied( self, col_num, row_num )
+get_character( self, col_num, row_num )
+active_character( self )
+selected_action( self )
+target( self )									#returns the character instance
 execute( self )
-calcDamage( self, person, action )
-chooseTarget( self, dmg, target )
-setTarget( self, coord )
-get_rect_id( self, col, row )
-get_text_id( self, col, row )
+calc_damage( self, person, action )
+choose_target( self, dmg, target )
+set_target( self, new_id )
+add_rect_id( self, new_id, col, row )
+add_text_id( self, new_id, col, row )
+get_pos( self, rect_id )
+# get_rect_id( self, col, row )
+# get_text_id( self, col, row )
 '''
 
 class Battle:
@@ -26,8 +29,10 @@ class Battle:
 		self.battlefield.add_party( self.enemies )
 		self.turn = (0, 0)
 		self.active_action = 0
-		self.active_target = ( 0, 0 )
+		self.active_target = None
 		self.next_turn()
+		self.rect_ids = {}
+		self.text_ids = {}
 
 	def next_turn( self ):
 		x = self.turn[0]
@@ -43,7 +48,7 @@ class Battle:
 				or 	( x == self.turn[0] and y == self.turn[1] ) ):
 				break
 		self.set_turn( x, y )
-		self.active_target = self.enemies.get_first_living()
+		self.active_target = None
 
 	def set_turn( self, col, row ):
 		self.turn = ( col, row )
@@ -65,7 +70,7 @@ class Battle:
 		return self._active_character().get_action( self.active_action )
 
 	def target( self ):
-		return self.battlefield.get_character( self.active_target[0], self.active_target[1] )
+		return self.battlefield.get_character( rect_ids[ active_target ][0], rect_ids[ active_target ][1] )
 
 	def execute( self ):
 		dmg = self.calc_damage( self.active_character(), self.selected_action() )
@@ -94,11 +99,20 @@ class Battle:
 		elif( target == Target.PARTY ):
 			self.allies.take_aoe( dmg )
 
-	def setTarget( self, coord ):
-		self.active_target = coord
+	def set_target( self, new_target ):
+		self.active_target = new_target
+
+	def add_rect_id( self, new_id, col, row ):
+		self.rect_ids[ new_id ] = ( col, row )
+
+	def add_text_id( self, new_id, col, row ):
+		self.text_ids[ new_id ] = ( col, row )
+
+	def get_pos( self, rect_id ):
+		return self.rect_ids[ rect_id ]
 
 	def get_rect_id( self, col, row ):
 		return self.battlefield.get_rect_id( col, row )
-
-	def get_text_id( self, col, row ):
-		return self.battlefield.get_text_id( col, row )
+	#
+	# def get_text_id( self, col, row ):
+	# 	return self.battlefield.get_text_id( col, row )
