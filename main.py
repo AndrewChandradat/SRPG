@@ -25,47 +25,48 @@ fight = Battle( p1, p2, 6, 3 )
 
 
 
-canvas_width = 1300
-battle_area_height = 400
-action_area_height = 150
-canvas_height = battle_area_height + action_area_height
-num_cols = 6
-num_rows = 3
-rec_width = 175
-rec_height = 100
-side_margin = 25
-top_margin = 25
+CANVAS_WIDTH = 1200
+BATTLE_AREA_HEIGHT = 380
+ACTION_AREA_HEIGHT = 150
+CANVAS_HEIGHT = BATTLE_AREA_HEIGHT + ACTION_AREA_HEIGHT
+NUM_COLS = 6
+NUM_ROWS = 3
+REC_WIDTH = 175
+REC_HEIGHT = 100
+SIDE_MARGIN = 25
+TOP_MARGIN = 25
 
-inter_horiz_margin = calc_inter_margin( canvas_width, side_margin, num_cols, rec_width )
-inter_vert_margin = calc_inter_margin( battle_area_height, top_margin, num_rows, rec_height )
+inter_horiz_margin = calc_inter_margin( CANVAS_WIDTH, SIDE_MARGIN, NUM_COLS, REC_WIDTH )
+inter_vert_margin = calc_inter_margin( BATTLE_AREA_HEIGHT, TOP_MARGIN, NUM_ROWS, REC_HEIGHT )
 
 root = Tk()
-canvas = Canvas( root, width=canvas_width, height=canvas_height, cursor="arrow" )
-canvas.pack()
+root.configure( bg="white" )
 
 for y in range( 0, fight.battlefield.height ):
 	for x in range( 0, fight.battlefield.width ):
-		topleft_x = side_margin + ( x * ( rec_width + inter_horiz_margin ) ) 	#calculating rect positions
-		topleft_y = top_margin + ( y * ( rec_height + inter_vert_margin ) )		#calculating rect positions
-		rect_id = canvas.create_rectangle( topleft_x, topleft_y, topleft_x + rec_width, topleft_y + rec_height, fill="white", width=2)
-		fight.add_rect_id( rect_id, x, y )
+
+		frame = Frame( root, height=REC_HEIGHT, width=REC_WIDTH, bg="white",
+						highlightbackground="black", highlightcolor="black", highlightthickness=2, )
+		frame.grid( column=x, row=y, padx=inter_horiz_margin, pady=inter_vert_margin )
+		frame.grid_propagate(0)
 
 		if( fight.space_is_occupied( x, y ) ):
-			if( fight.turn == ( x, y ) ):
-				canvas.itemconfigure( rect_id, outline="red" )
+			if( fight.turn == (x, y) ):
+				frame.configure(  highlightbackground="red", highlightcolor="red" )
 
-			if( fight.active_target == ( x, y) ):
-				canvas.itemconfigure( rect_id, dash=( 10, 5 ) )
+			if( fight.active_target == ( x, y ) ):
+				frame.configure( highlightbackground=None, highlightcolor=None, relief="groove", bd=5 )
 
-			canvas.itemconfig( rect_id, tags="combatant" )
-			text_id = canvas.create_text( topleft_x + (rec_width/2), topleft_y + (rec_height/2), text=fight.get_character( x, y ).name() )
-			fight.add_text_id( text_id, x, y )
+			frame.configure( cursor="hand2" )
+			frame.columnconfigure(0, weight=1)
+			frame.rowconfigure( 0, weight=1 )
+			frame.rowconfigure( 1, weight=2 )
+			char = fight.get_character( (x, y) )
+			name = Label( frame, text=char.name(), bg="white" )
+			hp = Label( frame, text=char.hp_meter, bg="white" )
+			name.grid( sticky=S, columnspan=2 )
+			hp.grid( )
 
-canvas.itemconfigure( "combatant", activewidth=3 )
-canvas.tag_bind( "combatant", '<Enter>', lambda event: change_cursor( event, True ) )
-canvas.tag_bind( "combatant", '<Leave>', lambda event: change_cursor( event, False ) )
-canvas.tag_bind( "combatant", '<Button-1>', lambda event: target_char( event, fight ) )
-
-
+			frame.bind("<Button-1>", lambda e, f=fight, pos=(x,y): target_char( e, f, pos ))
 
 root.mainloop()

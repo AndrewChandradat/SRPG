@@ -1,5 +1,4 @@
 from classes.action import Target, Stat, Action
-
 '''
 Character
 __init__( self, name, hp = 10, strength = 1 )
@@ -10,6 +9,7 @@ CharacterInstance
 __init__( self, original )
 __str__( self )
 take_damage( self, dmg )
+change_hp(self)
 is_alive( self )
 is_dead( self )
 actions( self )
@@ -38,22 +38,28 @@ class Character:
 class CharacterInstance:
 	def __init__( self, original ):
 		self.original = original
-		self.maxHP = original.hp
-		self.currHP = original.hp
+		self.max_hp = original.hp
+		self.curr_hp = original.hp
+		self.hp_meter = ""
+		self.change_hp()
 		self.strength = original.strength
 
 	def __str__( self ):
 		return self.original.name
 
 	def take_damage( self, dmg ):
-		self.currHP -= dmg;
-		if( self.currHP < 1 ):
-			self.currHP = 0
-		elif( self.currHP > self.maxHP ):
-			self.currHP = self.maxHP
+		self.curr_hp -= dmg;
+		if( self.curr_hp < 1 ):
+			self.curr_hp = 0
+		elif( self.curr_hp > self.max_hp ):
+			self.curr_hp = self.max_hp
+		self.change_hp()
+
+	def change_hp(self):
+		self.hp_meter = str( self.curr_hp) + "/" + str( self.max_hp)
 
 	def is_alive( self ):
-		return self.currHP > 0
+		return self.curr_hp > 0
 
 	def is_dead( self ):
 		return not self.is_alive()

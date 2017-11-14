@@ -5,7 +5,7 @@ __init__( self, allies, enemies, num_cols, num_rows )
 next_turn( self )
 is_ally_turn( self )
 space_is_occupied( self, col_num, row_num )
-get_character( self, col_num, row_num )
+get_character( self, pos )
 active_character( self )
 selected_action( self )
 target( self )									#returns the character instance
@@ -60,8 +60,8 @@ class Battle:
 	def space_is_occupied( self, col_num, row_num ):
 		return self.battlefield.space_is_occupied( col_num, row_num )
 
-	def get_character( self, col_num, row_num ):
-		return self.battlefield.get_character( col_num, row_num )
+	def get_character( self, pos ):
+		return self.battlefield.get_character( pos[0], pos[1] )
 
 	def active_character( self ):
 		return self.battlefield.get_character( self.turn[0], self.turn[1] )
@@ -100,7 +100,7 @@ class Battle:
 			self.allies.take_aoe( dmg )
 
 	def set_target( self, new_target ):
-		self.active_target = new_target
+		self.active_target = new_target[0]
 
 	def add_rect_id( self, new_id, col, row ):
 		self.rect_ids[ new_id ] = ( col, row )
