@@ -3,6 +3,7 @@ from tkinter import *
 from classes.character import Character, CharacterInstance
 from classes.party import Party
 from classes.battle import Battle
+from classes.action import Action, Target, Stat
 from ui import *
 
 #Game creation stuff
@@ -10,6 +11,9 @@ from ui import *
 andrew = Character( "Andrew" )
 bob = Character( "Bob" )
 goblin = Character( "Goblin" )
+
+heal = Action("Heal", "Heal one target", -1, Target.SINGLE, Stat.STRENGTH )
+bob.add_action( heal )
 
 p1 = Party()
 p1.add_member( andrew, 2, 1 )
@@ -33,6 +37,10 @@ NUM_COLS = 6
 NUM_ROWS = 3
 REC_WIDTH = 175
 REC_HEIGHT = 100
+ACTION_TOP_MARGIN = 25
+ACTION_SIDE_MARGIN = 20
+ACTION_HEIGHT = ACTION_AREA_HEIGHT - (2*ACTION_TOP_MARGIN)
+ACTION_WIDTH = 150
 SIDE_MARGIN = 25
 TOP_MARGIN = 25
 
@@ -41,7 +49,7 @@ inter_vert_margin = calc_inter_margin( BATTLE_AREA_HEIGHT, TOP_MARGIN, NUM_ROWS,
 
 root = Tk()
 root.configure( bg="white" )
-
+#BATTLEFIELD
 for y in range( 0, fight.battlefield.height ):
 	for x in range( 0, fight.battlefield.width ):
 
@@ -51,22 +59,34 @@ for y in range( 0, fight.battlefield.height ):
 		frame.grid_propagate(0)
 
 		if( fight.space_is_occupied( x, y ) ):
-			if( fight.turn == (x, y) ):
-				frame.configure(  highlightbackground="red", highlightcolor="red" )
+			configure_character_space( fight, frame, x, y )
 
-			if( fight.active_target == ( x, y ) ):
-				frame.configure( highlightbackground=None, highlightcolor=None, relief="groove", bd=5 )
 
-			frame.configure( cursor="hand2" )
-			frame.columnconfigure(0, weight=1)
-			frame.rowconfigure( 0, weight=1 )
-			frame.rowconfigure( 1, weight=2 )
-			char = fight.get_character( (x, y) )
-			name = Label( frame, text=char.name(), bg="white" )
-			hp = Label( frame, text=char.hp_meter, bg="white" )
-			name.grid( sticky=S, columnspan=2 )
-			hp.grid( )
+#ACTION BAR
+action_bar = Frame( root, height=ACTION_AREA_HEIGHT, width=CANVAS_WIDTH+(2*SIDE_MARGIN), bg="white",
+					highlightbackground="black", highlightcolor="black", highlightthickness=2, )
+action_bar.grid( row=fight.battlefield.height+1, columnspan=fight.battlefield.width, pady=10 )
+action_bar.grid_propagate( 0 )
 
-			frame.bind("<Button-1>", lambda e, f=fight, pos=(x,y): target_char( e, f, pos ))
+action_count = 0
+for action in fight.active_character().movelist():
+
+	action_frame = Frame( action_bar, height=ACTION_HEIGHT, width=ACTION_WIDTH, bg="white",
+							highlightbackground="black", highlightcolor="black", highlightthickness=1,
+							cursor="hand2")
+	action_frame.grid( row=0, column=action_count, padx=SIDE_MARGIN, pady=ACTION_TOP_MARGIN )
+	action_frame.grid_propagate( 0 )
+	action_frame.columnconfigure(0, weight=1)
+
+	if( action_count == fight.active_action_index ):
+		action_frame.config( highlightbackground="red", highlightcolor="red", highlightthickness=1 )
+
+	action_name = Label( action_frame, text=action.name, bg="white" )
+	action_name.grid()
+
+	action_frame.bind( "<Button-1>", lambda e, f=fight, index=action_count: select_action( e, f, index ))
+
+
+	action_count = action_count + 1
 
 root.mainloop()

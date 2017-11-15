@@ -72,3 +72,6 @@ class CharacterInstance:
 
 	def name( self ):
 		return self.original.name
+
+	def movelist( self ):
+		return self.original.movelist
