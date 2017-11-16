@@ -1,5 +1,5 @@
 from classes.grid import Grid
-
+from classes.action import Stat, Target
 '''
 __init__( self, allies, enemies, num_cols, num_rows )
 next_turn( self )								#goes to next character in turn order
@@ -24,14 +24,15 @@ class Battle:
 		self.enemies = enemies
 		self.battlefield.add_party( self.allies )
 		self.battlefield.add_party( self.enemies )
+
 		self.turn = (0, 0)
+		self.active_character_frame = None
 
 		self.active_action_frame = None
 		self.active_action_index = None
 		self.active_target_frame = None
 		self.active_target_pos = None
 
-		self.active_target = None
 		self.next_turn()
 
 	def next_turn( self ):		#goes to next character in turn order
@@ -54,7 +55,7 @@ class Battle:
 	def set_turn( self, col, row ):
 		self.turn = ( col, row )
 		self.active_action_frame = None
-		self.active_action_index = None
+		self.active_action_index = 0
 
 	def set_action( self, frame, index ):
 		self.active_action_frame = frame
@@ -80,12 +81,11 @@ class Battle:
 		return self.active_character().get_action( self.active_action_index )
 
 	def target( self ):
-		return self.battlefield.get_character( active_target_pos[0], active_target_pos[1] )
+		return self.battlefield.get_character( self.active_target_pos[0], self.active_target_pos[1] )
 
 	def execute( self ):
 		dmg = self.calc_damage( self.active_character(), self.selected_action() )
 		self.choose_target( dmg, self.selected_action().target )
-		self.next_turn()
 
 	def calc_damage( self, person, action ):
 		if( action.modifier == Stat.STRENGTH ):
@@ -95,7 +95,7 @@ class Battle:
 
 	def choose_target( self, dmg, target ):
 		if( target == Target.SINGLE ):
-			self.Target().take_damage( dmg )
+			self.target().take_damage( dmg )
 		elif( target == Target.ALL ):
 			self.enemies.take_aoe( dmg )
 		elif( target == Target.COLUMN ):
@@ -103,9 +103,9 @@ class Battle:
 		elif( target == Target.ROW ):
 			self.enemies.take_row_dmg( dmg, self.active_target_pos[2] )
 		elif( target == Target.SELF ):
-			self.activeCharacter().take_damage( dmg );
+			self.active_character().take_damage( dmg );
 		elif( target == Target.ALLY ):
-			self.getTarget().take_damage( dmg )
+			self.target().take_damage( dmg )
 		elif( target == Target.PARTY ):
 			self.allies.take_aoe( dmg )
 
