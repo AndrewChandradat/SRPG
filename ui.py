@@ -1,5 +1,7 @@
 from tkinter import *
 from config import *
+import time
+
 
 def calc_inter_margin( total_length, end_margins, num_spaces, space_width ):
 	return ( total_length - ( 2 * end_margins ) - ( num_spaces * space_width ) ) / ( num_spaces - 1 )
@@ -14,7 +16,8 @@ def configure_character_space( fight, frame, x, y ):
 		frame.configure(  highlightbackground="red", highlightcolor="red" )
 		fight.active_character_frame = frame
 	if( fight.active_target_pos == ( x, y ) ):
-		frame.configure( highlightbackground="blue", highlightcolor="blue", relief="groove", bd=5 )
+		frame.configure( highlightbackground="blue", highlightcolor="blue" )
+		fight.active_target_frame = frame
 	#configurations
 	frame.configure( cursor="hand2" )
 	frame.columnconfigure(0, weight=1)
@@ -44,22 +47,22 @@ def target_char( event, fight, pos):
 	fight.set_target( frame, pos )
 	frame.config( highlightbackground="blue", highlightcolor="blue" )
 
-def populate_action_list( action_bar, fight ):
+def populate_action_list( fight ):
 	action_count = 0
 	for action in fight.active_character().movelist():
-		action_frame = Frame( action_bar, height=ACTION_HEIGHT, width=ACTION_WIDTH, cursor="hand2")
+		action_frame = Frame( fight.action_bar_frame, height=ACTION_HEIGHT, width=ACTION_WIDTH, cursor="hand2")
 		action_frame.grid( row=0, column=action_count, padx=ACTION_SIDE_MARGIN, pady=ACTION_TOP_MARGIN )
 		action_frame.grid_propagate( 0 )
 		action_frame.columnconfigure(0, weight=1)
+
 		if( action_count == fight.active_action_index ):
 			fight.set_action( action_frame, action_count )
-			action_frame.config( highlightbackground="red", highlightcolor="red", highlightthickness=1 )
+			action_frame.config( highlightbackground="red", highlightcolor="red" )
 
 		action_name = Label( action_frame, text=action.name, bg="white" )
 		action_name.grid()
 		action_frame.bind( "<Button-1>", lambda e, f=fight, index=action_count: select_action( e, f, index ))
 		action_count = action_count + 1
-
 
 def select_action(event, fight, index):
 	frame = get_containing_frame( event )
@@ -70,21 +73,72 @@ def select_action(event, fight, index):
 
 def execute_action( event, fight ):
 	if( fight.active_target_frame and fight.active_action_frame ):
-		fight.execute()
+		dmg = fight.execute()
 		fight.active_target_frame.winfo_children()[1].config( text=fight.target().hp_meter )
+
 		fight.active_target_frame.config( highlightbackground="black", highlightcolor="black" )
-		fight.active_action_frame.config( highlightbackground="black", highlightcolor="black" )
-		go_next_turn( event.widget.winfo_toplevel(), fight )
+		if( fight.playable_turn() ):	#this frame is never set by ai
+			fight.active_action_frame.config( highlightbackground="black", highlightcolor="black" )
 
-def go_next_turn( root, fight ):
+		#need to move this to right pane
+		print( "%s uses %s on %s! (%+d)" % (fight.active_character().name(), fight.selected_action().name, fight.target().name(), 0 - dmg  )  )
+
+		go_next_turn( event, fight )
+
+def go_next_turn( event, fight ):
+
+	root = event.widget.winfo_toplevel()
+	#reset active_character border color
 	fight.active_character_frame.config( highlightbackground="black", highlightcolor="black" )
-	action_bar = fight.active_action_frame.master
 	fight.next_turn()
-	new_frame_number = fight.turn[0] + ( fight.battlefield.width * fight.turn[1])
-	fight.active_character_frame = root.winfo_children()[ new_frame_number ]
-	fight.active_character_frame.config( highlightbackground="red", highlightcolor="red" )
 
-	for w in action_bar.winfo_children():
+	if( fight.playable_turn() ):
+		player_turn( event, fight )
+	else:
+		ai_turn( event, fight )
+
+def player_turn( event, fight ):
+	root = event.widget.winfo_toplevel()
+	#get the frame of the new active character and make its border red
+	active_character_frame_number = fight.turn[0] + ( fight.battlefield.width * fight.turn[1])
+	fight.active_character_frame = root.winfo_children()[ active_character_frame_number ]
+	fight.active_character_frame.config( highlightbackground="red", highlightcolor="red" )
+	#get the frame of the default target and make its frame blue
+	target_frame_number = fight.active_target_pos[0] + ( fight.battlefield.width * fight.active_target_pos[1] )
+	fight.active_target_frame = root.winfo_children()[ target_frame_number ]
+	fight.active_target_frame.config( highlightbackground="blue", highlightcolor="blue" )
+	#clear action list and fill it with actions of new active character
+	for w in fight.action_bar_frame.winfo_children():
 		w.destroy()
-		
-	populate_action_list( action_bar, fight )
+	populate_action_list( fight )
+
+
+def ai_turn( event, fight ):
+	root = event.widget.winfo_toplevel()
+	#get the frame of the new active character and make its border red
+	active_character_frame_number = fight.turn[0] + ( fight.battlefield.width * fight.turn[1])
+	fight.active_character_frame = root.winfo_children()[ active_character_frame_number ]
+	fight.active_character_frame.config( highlightbackground="red", highlightcolor="red" )
+	#have the ai pick its attack and target
+	fight.active_character().automate( fight )
+	#get the frame of the default target and make its frame blue
+	target_frame_number = fight.active_target_pos[0] + ( fight.battlefield.width * fight.active_target_pos[1] )
+	fight.active_target_frame = root.winfo_children()[ target_frame_number ]
+	fight.active_target_frame.config( highlightbackground="blue", highlightcolor="blue" )
+	#clear action list
+	for w in fight.action_bar_frame.winfo_children():
+		w.destroy()
+	#display combat text
+	combat_text = "%s uses %s on %s!" % (fight.active_character().name(), fight.selected_action().name, fight.target().name() )
+	combat_message_f = Frame( fight.action_bar_frame, height=ACTION_AREA_HEIGHT - 5, width=BATTLE_AREA_WIDTH+(2*SIDE_MARGIN) - 5,
+								highlightbackground="white", highlightcolor="white")
+	combat_message_f.grid_propagate( 0 )
+	combat_message_f.grid()
+	combat_message = Label( combat_message_f, text=combat_text, font=("", 20), bg="white" )
+	combat_message.grid()
+	#refresh window
+	#fight.action_bar_frame.update_idletasks()
+	#pause
+	#time.sleep( 1 )
+
+	#execute_action( event, fight )

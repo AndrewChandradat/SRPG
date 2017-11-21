@@ -5,6 +5,7 @@ class Stat( Enum ):
 	HP = 1
 	MP = 2
 	STRENGTH = 3
+	INTELLIGENCE = 4
 
 class Target( Enum ):
 	SINGLE = 1

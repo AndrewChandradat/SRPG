@@ -1,4 +1,4 @@
-lata = 2
+lata = 2 #so that the function list is ignored
 
 '''
 __init__( self )
@@ -9,7 +9,8 @@ is_alive( self )
 take_aoe( self, dmg )
 take_row_dmg( self, dmg, row_num )
 take_col_dmg( self, dmg, col_num )
-get_first_living( self )
+get_first_living( self )			#returns pos of first living character in this party
+get_lowest_hp( self )				#returns pos of person with lowest hp in party. Must be alive and damaged. If all members are either dead or max hp, returns None
 '''
 
 
@@ -61,3 +62,14 @@ class Party:
 			if( person[0].is_alive() ):
 				return ( person[1], person[2] )
 		return (0,0)
+
+	def get_lowest_hp( self ):
+		curr_lowest = None
+		for person in self.members:
+			if( person[0].is_alive() and (person[0].curr_hp < person[0].max_hp) ):
+				if( not curr_lowest ):
+					curr_lowest = person
+				elif ( person[0].curr_hp < curr_lowest[0].curr_hp ):
+					curr_lowest = person
+
+		return ( curr_lowest[1], curr_lowest[2] )

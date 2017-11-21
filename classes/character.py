@@ -1,4 +1,5 @@
 from classes.action import Target, Stat, Action
+from actions.attacks import attack
 '''
 Character
 __init__( self, name, hp = 10, strength = 1 )
@@ -12,21 +13,21 @@ take_damage( self, dmg )
 change_hp(self)
 is_alive( self )
 is_dead( self )
+is_npc( self )
 actions( self )
 get_action( self, index )
 name( self )
 '''
 
-attack = Action( "Attack", "", 1, Target.SINGLE, Stat.STRENGTH )
-
 class Character:
-	def __init__( self, name, hp = 10, strength = 1 ):
+	def __init__( self, name, playable=True, hp = 10, strength = 1, intelligence = 1,   ):
 		self.name = name
 		self.hp = hp
 		self.strength = strength
+		self.intelligence = intelligence
 		self.movelist = []
 		self.add_action( attack )
-
+		self.playable = playable
 
 	def add_action( self, new_action ):
 		self.movelist.append( new_action )
@@ -34,15 +35,21 @@ class Character:
 	def copy( self ):
 		return CharacterInstance( self )
 
+	def ai( self, fight ):
+		print("Called non-existant ai")
+
+
 
 class CharacterInstance:
-	def __init__( self, original ):
+	def __init__( self, original, ):
 		self.original = original
 		self.max_hp = original.hp
 		self.curr_hp = original.hp
 		self.hp_meter = ""
 		self.change_hp()
 		self.strength = original.strength
+		self.intelligence = original.intelligence
+
 
 	def __str__( self ):
 		return self.original.name
@@ -64,6 +71,9 @@ class CharacterInstance:
 	def is_dead( self ):
 		return not self.is_alive()
 
+	def is_npc( self ):
+		return not self.original.playable
+
 	def actions( self ):
 		return self.original.movelist
 
@@ -75,3 +85,8 @@ class CharacterInstance:
 
 	def movelist( self ):
 		return self.original.movelist
+
+	def automate( self, fight ):
+		self.original.ai( fight )
+		#just setting the frame to something so that ui.execute_action() works
+		fight.active_action_frame = 1
