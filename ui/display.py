@@ -75,6 +75,7 @@ def create_sidebar( root, fight ):
 	execute_label.image = execute_icon
 	execute_label.grid()
 	execute_label.bind( "<Button-1>", lambda e, f = fight: execute_action( e, f ) )
+	root.bind( "<space>", lambda e, f = fight: execute_action( e, f ) )
 	# border beneath execute button
 	bottom_execute_border = Frame( sidebar, height=2, width=SIDEBAR_WIDTH-4, )
 	bottom_execute_border.grid()
