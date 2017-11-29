@@ -2,51 +2,6 @@ from tkinter import *
 from config import *
 import time
 
-
-def calc_inter_margin( total_length, end_margins, num_spaces, space_width ):
-	return ( total_length - ( 2 * end_margins ) - ( num_spaces * space_width ) ) / ( num_spaces - 1 )
-
-INTER_HORIZ_MARGIN = calc_inter_margin( BATTLE_AREA_WIDTH, SIDE_MARGIN, NUM_COLS, REC_WIDTH )
-INTER_VERT_MARGIN = calc_inter_margin( BATTLE_AREA_HEIGHT, TOP_MARGIN, NUM_ROWS, REC_HEIGHT )
-
-
-def configure_character_space( fight, frame, x, y ):
-	#highlighting based on target and turn status
-	if( fight.turn == (x, y) ):
-		frame.configure(  highlightbackground="red", highlightcolor="red" )
-		fight.active_character_frame = frame
-	if( fight.active_target_pos == ( x, y ) ):
-		frame.configure( highlightbackground="blue", highlightcolor="blue" )
-		fight.active_target_frame = frame
-	#configurations
-	frame.configure( cursor="hand2" )
-	frame.columnconfigure(0, weight=1)
-	frame.rowconfigure( 0, weight=1 )
-	frame.rowconfigure( 1, weight=2 )
-	#displaying character info
-	char = fight.get_character( (x, y) )
-	name = Label( frame, text=char.name(), bg="white" )
-	hp = Label( frame, text=char.hp_meter, bg="white" )
-	name.grid( sticky=S, columnspan=2 )
-	hp.grid( )
-	#target binding
-	frame.bind("<Button-1>", lambda e, f=fight, pos=(x,y): target_char( e, f, pos ))
-	name.bind("<Button-1>", lambda e, f=fight, pos=(x,y): target_char( e, f, pos ))
-	hp.bind("<Button-1>", lambda e, f=fight, pos=(x,y): target_char( e, f, pos ))
-
-def get_containing_frame( event ):
-	if( event.widget.winfo_class() == "Frame" ):
-		return event.widget
-	else:
-		return event.widget.master
-
-def target_char( event, fight, pos):
-	frame = get_containing_frame( event )
-	if( fight.active_target_frame ):
-		fight.active_target_frame.config( highlightbackground="black", highlightcolor="black" )
-	fight.set_target( frame, pos )
-	frame.config( highlightbackground="blue", highlightcolor="blue" )
-
 def populate_action_list( fight ):
 	action_count = 0
 	for action in fight.active_character().movelist():
@@ -63,6 +18,20 @@ def populate_action_list( fight ):
 		action_name.grid()
 		action_frame.bind( "<Button-1>", lambda e, f=fight, index=action_count: select_action( e, f, index ))
 		action_count = action_count + 1
+
+
+def get_containing_frame( event ):
+	if( event.widget.winfo_class() == "Frame" ):
+		return event.widget
+	else:
+		return event.widget.master
+
+def target_char( event, fight, pos):
+	frame = get_containing_frame( event )
+	if( fight.active_target_frame ):
+		fight.active_target_frame.config( highlightbackground="black", highlightcolor="black" )
+	fight.set_target( frame, pos )
+	frame.config( highlightbackground="blue", highlightcolor="blue" )
 
 def select_action(event, fight, index):
 	frame = get_containing_frame( event )

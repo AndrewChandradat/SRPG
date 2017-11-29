@@ -17,3 +17,11 @@ SIDEBAR_HEIGHT = BATTLE_AREA_HEIGHT + ACTION_AREA_HEIGHT
 SIDEBAR_WIDTH = 175
 
 EXECUTE_HEIGHT = 75
+
+def calc_inter_margin( total_length, end_margins, num_spaces, space_width ):
+	return ( total_length - ( 2 * end_margins ) - ( num_spaces * space_width ) ) / ( num_spaces - 1 )
+
+INTER_HORIZ_MARGIN = calc_inter_margin( BATTLE_AREA_WIDTH, SIDE_MARGIN, NUM_COLS, REC_WIDTH )
+INTER_VERT_MARGIN = calc_inter_margin( BATTLE_AREA_HEIGHT, TOP_MARGIN, NUM_ROWS, REC_HEIGHT )
+
+EXECUTE_ICON_PATH = "assets/execute4.png"

@@ -1,0 +1,8 @@
+__pycache__/
+classes/__pycache__/
+actions/__pycache__/
+characters/__pycache__/
+parties/__pychache__/
+ui/__pychache__/
+notes.txt
+test.py
